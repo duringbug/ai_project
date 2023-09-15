@@ -3,7 +3,7 @@ Description:
 Author: 唐健峰
 Date: 2023-09-14 10:23:00
 LastEditors: ${author}
-LastEditTime: 2023-09-15 14:27:12
+LastEditTime: 2023-09-16 00:14:19
 '''
 
 import json
@@ -19,7 +19,7 @@ from cloud.duringbug.dao.data import TF_IDF
 
 def main():
 
-    data = readPreprocessing("resources/exp1_data/train_data.txt")
+    data = readPreprocessing("resources/exp1_data/my_train_data.txt")
 
     # 将字符串分割为多个JSON对象
     json_objects = data.strip().split('\n')
@@ -42,7 +42,7 @@ def main():
     ten_dicts = [defaultdict(int) for _ in range(10)]
     ten_idf_values = [{} for _ in range(10)]
 
-    for json_str in tqdm(json_objects, total=all_num, desc="遍历train_txt中"):
+    for json_str in tqdm(json_objects, total=all_num, desc="遍历my_train_txt中"):
 
         data = json.loads(json_str)
         label = data["label"]
@@ -59,7 +59,8 @@ def main():
 
     # 计算IDF
     for i, idf_values in enumerate(ten_idf_values):
-        total_documents = 800
+        # @ TODO 数据划分时记得改
+        total_documents = 400
         all_num_2 = len(ten_dicts[i])
         for word, df in tqdm(ten_dicts[i].items(), total=all_num_2, desc=f'计算第{i}类文章的IDF'):
             # 使用对数形式计算IDF，避免分母为0
