@@ -3,7 +3,7 @@
  * @Author: 唐健峰
  * @Date: 2023-09-14 15:21:44
  * @LastEditors: ${author}
- * @LastEditTime: 2023-09-16 16:58:14
+ * @LastEditTime: 2023-09-16 17:30:32
 -->
 ## 词袋模型
 词袋模型(Bag of Words，BoW):将文本视为词汇表中的词语集合，然后计算每个词语在文本中的出现频率。这将创建一个词频向量，其中每个元素表示对应词汇表中词语的出现次数。词袋模型忽略了词语的顺序和语法结构，只关注词汇表中的词汇。
@@ -55,6 +55,9 @@ OK
 ```
 
 ## 偏置系数提高不大，大概在0.2到0.4个百分点之间
+
+
+**使用BFGS算法**
 
 ```bash
 tangjianfeng@tangjianfengdeMacBook-Air project_1 % python -u "/Volumes/TJF_YINGPAN/ai_project/project_1/src/python/__test__.py"

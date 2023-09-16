@@ -3,23 +3,31 @@ Description:
 Author: 唐健峰
 Date: 2023-09-14 10:55:55
 LastEditors: ${author}
-LastEditTime: 2023-09-16 15:32:49
+LastEditTime: 2023-09-16 20:19:04
 '''
 
 
 import unittest
-from cloud.duringbug.dao.data import *
-from cloud.duringbug.preprocessing.index import main
-from cloud.duringbug.train.train_txt_processing import *
-from cloud.duringbug.preprocessing.read import train_file_divide
-
-from cloud.duringbug.main.logistic_regression import index
 
 
 class MyTestCase(unittest.TestCase):
 
-    def test_logistic_regression(self):
-        index()
+    def test_import(self):
+        try:
+            import numpy
+            from tqdm import tqdm
+            import sqlite3
+            import os
+            import re
+            import json
+            import math
+            from collections import defaultdict
+            import random
+            from scipy.optimize import minimize
+            print("所有所需的包都已安装并可用。")
+        except ImportError as e:
+            missing_module = str(e).split()[-1]
+            print(f"缺少以下包: {missing_module}")
 
 
 if __name__ == '__main__':

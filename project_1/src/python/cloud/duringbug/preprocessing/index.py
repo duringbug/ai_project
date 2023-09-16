@@ -3,7 +3,7 @@ Description:
 Author: 唐健峰
 Date: 2023-09-14 10:23:00
 LastEditors: ${author}
-LastEditTime: 2023-09-16 16:24:06
+LastEditTime: 2023-09-16 19:26:14
 '''
 
 import json
@@ -17,7 +17,7 @@ from cloud.duringbug.dao.data import insertText
 from cloud.duringbug.dao.data import TF_IDF
 
 
-def main():
+def tf_idf_Bow():
 
     data = readPreprocessing("resources/exp1_data/my_train_data.txt")
 

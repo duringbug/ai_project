@@ -3,17 +3,18 @@ Description:
 Author: 唐健峰
 Date: 2023-09-14 10:35:44
 LastEditors: ${author}
-LastEditTime: 2023-09-15 16:02:36
+LastEditTime: 2023-09-16 19:22:47
 '''
 import numpy as np
 from tqdm import tqdm
-from decimal import Decimal
 import sqlite3
 import os
 import re
 
 
-def init():
+def dbinit():
+    if os.path.exists('BoW.db'):
+        os.remove('BoW.db')
     conn = sqlite3.connect('BoW.db')
     cursor = conn.cursor()
     cursor.execute('''
