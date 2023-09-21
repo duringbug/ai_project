@@ -3,7 +3,7 @@ Description:
 Author: 唐健峰
 Date: 2023-09-14 10:23:00
 LastEditors: ${author}
-LastEditTime: 2023-09-16 19:26:14
+LastEditTime: 2023-09-19 17:50:05
 '''
 
 import json
@@ -15,6 +15,10 @@ from collections import defaultdict
 from cloud.duringbug.preprocessing.read import readPreprocessing
 from cloud.duringbug.dao.data import insertText
 from cloud.duringbug.dao.data import TF_IDF
+from cloud.duringbug.conf.config import AppConfig
+
+app_config = AppConfig()
+app_config.load_config_from_file('resources/config/config.json')
 
 
 def tf_idf_Bow():
@@ -49,7 +53,7 @@ def tf_idf_Bow():
         raw_text = data["raw"]
 
         # 将文本转换为小写并拆分为单词
-        punctuation_to_split = r'[ -,&!".:?();\n$\'#\*-+]'
+        punctuation_to_split = r'[| -,&!".:?();\n$\'#\*-+]+(?!\s)|\s+'
         words = split_text(raw_text, punctuation_to_split)
 
         for word in set(words):  # 使用 set 去除重复词语
@@ -60,7 +64,7 @@ def tf_idf_Bow():
     # 计算IDF
     for i, idf_values in enumerate(ten_idf_values):
         # @ TODO 数据划分时记得改
-        total_documents = 400
+        total_documents = app_config.TRAIN_NUM
         all_num_2 = len(ten_dicts[i])
         for word, df in tqdm(ten_dicts[i].items(), total=all_num_2, desc=f'计算第{i}类文章的IDF'):
             # 使用对数形式计算IDF，避免分母为0
@@ -94,3 +98,13 @@ def tf_idf_Bow():
     conn.commit()
     # 提交更改并关闭数据库连接
     conn.close()
+
+
+def split_text(text, punctuation_to_split=None):
+    # 默认的标点符号分隔符是空格
+    if punctuation_to_split is None:
+        punctuation_to_split = r'\s+'
+
+    # 使用正则表达式进行分割
+    words = re.split(punctuation_to_split, text.lower())
+    return words

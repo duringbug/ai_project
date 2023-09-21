@@ -5,7 +5,7 @@ block_cipher = None
 
 
 a = Analysis(
-    ['/Volumes/TJF_YINGPAN/ai_project/project_1/src/python/index.py'],
+    ['src/python/index.py'],
     pathex=[],
     binaries=[],
     datas=[],

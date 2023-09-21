@@ -3,7 +3,7 @@ Description:
 Author: 唐健峰
 Date: 2023-09-14 10:13:45
 LastEditors: ${author}
-LastEditTime: 2023-09-16 20:57:34
+LastEditTime: 2023-09-18 13:40:42
 '''
 from cloud.duringbug.main.logistic_regression import *
 from cloud.duringbug.test.check_environment import *
@@ -25,5 +25,5 @@ if __name__ == "__main__":
             logistic_regression_to_results_txt()
             print("回车清理缓存")
             user_input = input("")
-            if user_input:
+            if user_input == "":
                 after_logistic_regression_to_results_txt()

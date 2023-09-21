@@ -3,7 +3,7 @@ Description:
 Author: 唐健峰
 Date: 2023-09-15 18:20:07
 LastEditors: ${author}
-LastEditTime: 2023-09-16 20:14:20
+LastEditTime: 2023-09-18 17:35:27
 '''
 import sqlite3
 import json
@@ -13,6 +13,7 @@ from scipy.optimize import minimize
 from tqdm import tqdm
 
 from cloud.duringbug.preprocessing.read import readPreprocessing
+from cloud.duringbug.preprocessing.index import split_text
 
 
 def train_txt_to_matrix():
@@ -74,15 +75,6 @@ def train_txt_to_matrix():
     one_hot = np.zeros((all_num, 10))
     q_x = np.zeros((all_num, 10))
 
-    def split_text(text, punctuation_to_split=None):
-        # 默认的标点符号分隔符是空格
-        if punctuation_to_split is None:
-            punctuation_to_split = r'\s+'
-
-        # 使用正则表达式进行分割
-        words = re.split(punctuation_to_split, text.lower())
-        return words
-
     recode = 0
 
     b = np.zeros((all_num, 10))
@@ -98,7 +90,7 @@ def train_txt_to_matrix():
         # 创建1*N的零矩阵
         sample_matrix = np.zeros((1, len(words)))
 
-        punctuation_to_split = r'[ -,&!".:?();\n$\'#\*-+]'
+        punctuation_to_split = r'[| -,&!".:?();\n$\'#\*-+]+(?!\s)|\s+'
         target_words = split_text(raw_text, punctuation_to_split)
 
         for target_word in target_words:
@@ -173,15 +165,6 @@ def test_txt_to_matrix_without_b():
     one_hot = np.zeros((all_num, 10))
     q_x = np.zeros((all_num, 10))
 
-    def split_text(text, punctuation_to_split=None):
-        # 默认的标点符号分隔符是空格
-        if punctuation_to_split is None:
-            punctuation_to_split = r'\s+'
-
-        # 使用正则表达式进行分割
-        words = re.split(punctuation_to_split, text.lower())
-        return words
-
     recode = 0
     b = np.zeros((1, 10))
     for i, json_str in enumerate(tqdm(json_objects, total=all_num, desc="无偏置向量b下遍历test_my_verification_data中")):
@@ -195,7 +178,7 @@ def test_txt_to_matrix_without_b():
         # 创建1*N的零矩阵
         sample_matrix = np.zeros((1, len(words)))
 
-        punctuation_to_split = r'[ -,&!".:?();\n$\'#\*-+]'
+        punctuation_to_split = r'[| -,&!".:?();\n$\'#\*-+]+(?!\s)|\s+'
         target_words = split_text(raw_text, punctuation_to_split)
 
         for target_word in target_words:
@@ -276,15 +259,6 @@ def test_txt_to_matrix():
     one_hot = np.zeros((all_num, 10))
     q_x = np.zeros((all_num, 10))
 
-    def split_text(text, punctuation_to_split=None):
-        # 默认的标点符号分隔符是空格
-        if punctuation_to_split is None:
-            punctuation_to_split = r'\s+'
-
-        # 使用正则表达式进行分割
-        words = re.split(punctuation_to_split, text.lower())
-        return words
-
     recode = 0
     b = train_txt_to_matrix()
     for i, json_str in enumerate(tqdm(json_objects, total=all_num, desc="遍历test_my_verification_data中")):
@@ -298,7 +272,7 @@ def test_txt_to_matrix():
         # 创建1*N的零矩阵
         sample_matrix = np.zeros((1, len(words)))
 
-        punctuation_to_split = r'[ -,&!".:?();\n$\'#\*-+]'
+        punctuation_to_split = r'[| -,&!".:?();\n$\'#\*-+]+(?!\s)|\s+'
         target_words = split_text(raw_text, punctuation_to_split)
 
         for target_word in target_words:
@@ -432,7 +406,7 @@ def getX(texts):
     sample_matrix = np.zeros((len(text_dict), len(words)))
     for i, text in enumerate(tqdm(text_dict, total=len(text_dict), desc="遍历my_test_txt中")):
 
-        punctuation_to_split = r'[ -,&!".:?();\n$\'#\*-+]'
+        punctuation_to_split = r'[| -,&!".:?();\n$\'#\*-+]+(?!\s)|\s+'
         target_words = split_text(text_dict[i], punctuation_to_split)
 
         for target_word in target_words:

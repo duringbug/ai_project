@@ -3,10 +3,14 @@ Description:
 Author: 唐健峰
 Date: 2023-09-14 10:21:01
 LastEditors: ${author}
-LastEditTime: 2023-09-16 19:18:18
+LastEditTime: 2023-09-19 18:08:26
 '''
 import os
 import random
+from cloud.duringbug.conf.config import AppConfig
+
+app_config = AppConfig()
+app_config.load_config_from_file('resources/config/config.json')
 
 
 def readPreprocessing(path):
@@ -41,7 +45,7 @@ def train_file_divide():
     all_numbers = set(range(800))
 
     # 随机选择不重复的整数：注意index.py的63行也要改
-    random_numbers = set(random.sample(all_numbers, 400))
+    random_numbers = set(random.sample(all_numbers, app_config.TRAIN_NUM))
 
     # 计算不包含在随机选择中的整数集合
     remaining_numbers = all_numbers - random_numbers
@@ -56,5 +60,5 @@ def train_file_divide():
                     file1.write(json_objects[i*800+random_number]+'\n')
                 for remaining_number in remaining_numbers_list:
                     file2.write(json_objects[i*800+remaining_number]+'\n')
-    print("训练集4000条与测试集4000条划分成功")
+    print(f"训练集{app_config.TRAIN_NUM*10}条与测试集{(800-app_config.TRAIN_NUM)*10}条划分成功")
     return 0
