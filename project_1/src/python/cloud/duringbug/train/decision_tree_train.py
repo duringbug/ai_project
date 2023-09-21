@@ -3,7 +3,7 @@ Description:
 Author: 唐健峰
 Date: 2023-09-18 12:54:42
 LastEditors: ${author}
-LastEditTime: 2023-09-21 11:34:02
+LastEditTime: 2023-09-21 15:56:44
 '''
 # -- coding: utf-8 --
 
@@ -38,7 +38,7 @@ def train_txt_to_decision_tree_sample():
     np.savetxt('dis.txt', dis, fmt='%.16f')
     np.savetxt('sample.txt', sample, fmt='%.16f')
     create3D(average)
-    for k in range(1, 401):
+    for k in range(2401, 2801):
         create_surf(k, result)
 
 

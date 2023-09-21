@@ -3,7 +3,7 @@ Description:
 Author: 唐健峰
 Date: 2023-09-18 11:13:32
 LastEditors: ${author}
-LastEditTime: 2023-09-21 11:59:07
+LastEditTime: 2023-09-21 19:44:10
 '''
 
 from cloud.duringbug.dao.data import *
@@ -11,6 +11,7 @@ from cloud.duringbug.preprocessing.index import *
 from cloud.duringbug.preprocessing.read import train_file_divide
 
 import numpy as np
+import pdb
 
 
 def before_decision_tree_to_results_txt():
@@ -22,16 +23,21 @@ def before_decision_tree_to_results_txt():
 
 
 class RootNode:
-    def __init__(self, true_branch, false_branch, threshold_ratio):
+    def __init__(self, true_branch, false_branch):
         self.true_branch = true_branch
         self.false_branch = false_branch
-        self.threshold_ratio = threshold_ratio
+        self.test = 0
 
-    def get_result(self, score_matrix_list):
+    def get_result(self, score_matrix_list, threshold_ratio):
         sorted_list = sorted(score_matrix_list, reverse=True)
-        if sorted_list[0]/sorted_list[1] >= self.threshold_ratio:
+        sum = 0
+        for i in sorted_list:
+            sum += i
+
+        if sorted_list[1]/sum < threshold_ratio:
             return self.true_branch.get_result(score_matrix_list)
         else:
+            self.test += 1
             return self.false_branch.get_result(score_matrix_list)
 
 
