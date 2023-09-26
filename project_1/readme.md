@@ -3,7 +3,7 @@
  * @Author: 唐健峰
  * @Date: 2023-09-14 15:21:44
  * @LastEditors: ${author}
- * @LastEditTime: 2023-09-21 10:53:31
+ * @LastEditTime: 2023-09-26 21:27:24
 -->
 # 逻辑回归
 
@@ -113,6 +113,7 @@ OK
 
 # 决策树训练集
 True Labels表示真实标签，Predicted Labels下的Score表示相应标签不同分类下的得分
+
 ![p_1](https://img-blog.csdnimg.cn/4c8296e95cb44ad8b37b90f61a572736.png#pic_center)
 ![p_2](https://img-blog.csdnimg.cn/778dfc2910d746929ed8957b4d220890.png#pic_center)
 ![p_3](https://img-blog.csdnimg.cn/dda5d75d101446b2ae8e3fee0ec69669.png#pic_center)
@@ -225,3 +226,262 @@ since Python 3.9 and will be removed in a subsequent version.
 ## 根节点
 根据上面的实验基础，我打算将每个文本对应不同类中的得分为一个向量
 $\left(Score_1,Score_2,\cdots,Score_8,Score_9 \right)$
+如果第二个最大值的概率大于一个阀值，说明该段文本存在相似文本，就用余弦算法，如下
+```python
+class RootNode:
+    def __init__(self, true_branch, false_branch):
+        self.true_branch = true_branch
+        self.false_branch = false_branch
+        self.test = 0
+
+    def get_result(self, score_matrix_list, threshold_ratio):
+        sorted_list = sorted(score_matrix_list, reverse=True)
+        sum = 0
+        for i in sorted_list:
+            sum += i
+
+        if sorted_list[1]/sum < threshold_ratio:
+            return self.true_branch.get_result(score_matrix_list)
+        else:
+            self.test += 1
+            return self.false_branch.get_result(score_matrix_list)
+
+
+class LeafAverageNode:
+    def __init__(self, true_branch, false_branch):
+        self.true_branch = true_branch
+        self.false_branch = false_branch
+
+    def get_result(self, score_matrix_list):
+        return max(enumerate(score_matrix_list), key=lambda x: x[1])[0]
+
+
+class LeafCosNode:
+    def __init__(self, true_branch, false_branch, average_matrix):
+        self.true_branch = true_branch
+        self.false_branch = false_branch
+        self.average_matrix = average_matrix
+
+    def get_result(self, score_matrix_list):
+        score_vector = np.array(score_matrix_list)
+        cosine_distances = np.dot(self.average_matrix, score_vector) / (
+            np.linalg.norm(self.average_matrix, axis=1) * np.linalg.norm(score_vector))
+        return np.argmax(cosine_distances)
+
+```
+```python
+def test_root_node(self):
+        before_decision_tree_to_results_txt()
+        labels, sample, average, result = processing_json_txt(
+            "resources/exp1_data/my_train_data.txt", 5)
+        labels_2, sample_2, average_2, result_2 = processing_json_txt(
+            "resources/exp1_data/my_verification_data.txt", 5)
+        # 创建一个RootNode实例，其中true_branch是LeafAverageNode，false_branch是LeafCosNode
+        # threshold_ratio = 0.19
+        threshold_ratio = 0.19
+        root_node = RootNode(LeafAverageNode(None, None),
+                             LeafCosNode(None, None, average))
+        suc = 0
+        all = sample_2.shape[0]
+        for column_index in range(sample_2.shape[0]):
+            # pdb.set_trace()
+            column_list = sample_2[column_index, :].tolist()
+            result = root_node.get_result(column_list, threshold_ratio)
+            if result == labels[column_index]:
+                suc += 1
+        print(
+            f'threshold_ratio为{threshold_ratio}时,决策树正确率{suc/all},进行余弦算法的个数{root_node.test}')
+
+        root_node.test = 0
+        suc = 0
+        all = sample_2.shape[0]
+        for column_index in range(sample_2.shape[0]):
+            # pdb.set_trace()
+            column_list = sample_2[column_index, :].tolist()
+            result = root_node.get_result(column_list, 1)
+            if result == labels[column_index]:
+                suc += 1
+        print(
+            f'threshold_ratio为{0}时,决策树正确率{suc/all},进行余弦算法的个数{root_node.test}')
+
+```
+```bash
+tangjianfeng@tangjianfengdeMacBook-Air project_1 % python -u "/Volumes/TJF_YINGPAN/ai_project/project_1/src/python/__test__.py"
+
+Error deleting file: [Errno 2] No such file or directory: 'out/results.txt'
+Error deleting file: [Errno 2] No such file or directory: 'b.txt'
+文件 'BoW.db' 删除成功
+.s所有所需的包都已安装并可用。
+./Volumes/TJF_YINGPAN/ai_project/project_1/src/python/cloud/duringbug/preprocessing/read.py:48: DeprecationWarning: Sampling from a set deprecated
+since Python 3.9 and will be removed in a subsequent version.
+  random_numbers = set(random.sample(all_numbers, app_config.TRAIN_NUM))
+训练集4000条与测试集4000条划分成功
+遍历my_train_txt中: 100%|████████████████████████████████████████████████████████████████████████████████████| 4000/4000 [00:23<00:00, 169.66it/s]
+计算第0类文章的IDF: 100%|████████████████████████████████████████████████████████████████████████████████| 6611/6611 [00:00<00:00, 2349080.29it/s]
+计算第1类文章的IDF: 100%|████████████████████████████████████████████████████████████████████████████████| 4926/4926 [00:00<00:00, 2504380.79it/s]
+计算第2类文章的IDF: 100%|████████████████████████████████████████████████████████████████████████████████| 5069/5069 [00:00<00:00, 2477386.04it/s]
+计算第3类文章的IDF: 100%|████████████████████████████████████████████████████████████████████████████████| 4283/4283 [00:00<00:00, 2421051.76it/s]
+计算第4类文章的IDF: 100%|████████████████████████████████████████████████████████████████████████████████| 4453/4453 [00:00<00:00, 2498961.16it/s]
+计算第5类文章的IDF: 100%|████████████████████████████████████████████████████████████████████████████████| 5281/5281 [00:00<00:00, 2479028.47it/s]
+计算第6类文章的IDF: 100%|████████████████████████████████████████████████████████████████████████████████| 6616/6616 [00:00<00:00, 2463120.47it/s]
+计算第7类文章的IDF: 100%|████████████████████████████████████████████████████████████████████████████████| 4656/4656 [00:00<00:00, 2489950.20it/s]
+计算第8类文章的IDF: 100%|████████████████████████████████████████████████████████████████████████████████| 4743/4743 [00:00<00:00, 2439733.12it/s]
+计算第9类文章的IDF: 100%|████████████████████████████████████████████████████████████████████████████████| 6549/6549 [00:00<00:00, 2337346.57it/s]
+计算每类的词总数: 100%|█████████████████████████████████████████████████████████████████████████████████| 23665/23665 [00:00<00:00, 379294.00it/s]
+计算TF中: 100%|█████████████████████████████████████████████████████████████████████████████████████████| 23665/23665 [00:00<00:00, 245154.62it/s]
+储存TF-IDF中: 100%|█████████████████████████████████████████████████████████████████████████████████████| 23665/23665 [00:00<00:00, 226815.24it/s]
+计算每个词的信息熵: 100%|████████████████████████████████████████████████████████████████████████████████| 23665/23665 [00:00<00:00, 87949.80it/s]
+储存score向量矩阵: 100%|████████████████████████████████████████████████████████████████████████████████| 23665/23665 [00:00<00:00, 141295.23it/s]
+遍历resources/exp1_data/my_train_data.txt中: 100%|███████████████████████████████████████████████████████████| 4000/4000 [00:07<00:00, 500.06it/s]
+遍历resources/exp1_data/my_verification_data.txt中: 100%|████████████████████████████████████████████████████| 4000/4000 [00:07<00:00, 508.71it/s]
+threshold_ratio为0.19时,决策树正确率0.9245,进行余弦算法的个数76
+threshold_ratio为0时,决策树正确率0.9225,进行余弦算法的个数0
+.
+----------------------------------------------------------------------
+Ran 4 tests in 43.138s
+
+OK (skipped=1)
+```
+发现能提高0.2个百分点
+
+# 支持向量机
+```python
+def support_vector_machine():
+    words_train, labels_train = train_txt_to_support_vector_machine_sample(
+        "resources/exp1_data/my_train_data.txt")
+    words_test, labels_test = train_txt_to_support_vector_machine_sample(
+        "resources/exp1_data/my_verification_data.txt")
+    # 创建SVM分类器
+    svm_classifier = SVC(kernel='linear', C=1)
+    print("使用训练集训练SVM模型中...")
+    # 使用训练集训练SVM模型
+    svm_classifier.fit(words_train, labels_train.reshape(-1))
+    print("使用模型对测试集进行预测...")
+    # 使用模型对测试集进行预测
+    predictions = svm_classifier.predict(words_test)
+
+    # 计算准确度
+    accuracy = accuracy_score(labels_test.reshape(-1), predictions)
+    print("模型的准确度:", accuracy)
+```
+
+```bash
+tangjianfeng@tangjianfengdeMacBook-Air project_1 % python -u "/Volumes/TJF_YINGPAN/ai_project/project_1/src/python/__test__.py"
+
+Error deleting file: [Errno 2] No such file or directory: 'out/results.txt'
+Error deleting file: [Errno 2] No such file or directory: 'b.txt'
+文件 'BoW.db' 删除成功
+.s所有所需的包都已安装并可用。
+.s/Volumes/TJF_YINGPAN/ai_project/project_1/src/python/cloud/duringbug/preprocessing/read.py:48: DeprecationWarning: Sampling from a set deprecated
+since Python 3.9 and will be removed in a subsequent version.
+  random_numbers = set(random.sample(all_numbers, app_config.TRAIN_NUM))
+训练集4000条与测试集4000条划分成功
+遍历my_train_txt中: 100%|████████████████████████████████████████████████████████████████████████████████████| 4000/4000 [00:24<00:00, 166.37it/s]
+计算第0类文章的IDF: 100%|████████████████████████████████████████████████████████████████████████████████| 6590/6590 [00:00<00:00, 2236283.44it/s]
+计算第1类文章的IDF: 100%|████████████████████████████████████████████████████████████████████████████████| 4899/4899 [00:00<00:00, 2445595.73it/s]
+计算第2类文章的IDF: 100%|████████████████████████████████████████████████████████████████████████████████| 5094/5094 [00:00<00:00, 2443200.07it/s]
+计算第3类文章的IDF: 100%|████████████████████████████████████████████████████████████████████████████████| 4230/4230 [00:00<00:00, 2459371.49it/s]
+计算第4类文章的IDF: 100%|████████████████████████████████████████████████████████████████████████████████| 4348/4348 [00:00<00:00, 2392971.24it/s]
+计算第5类文章的IDF: 100%|████████████████████████████████████████████████████████████████████████████████| 5420/5420 [00:00<00:00, 2478265.31it/s]
+计算第6类文章的IDF: 100%|████████████████████████████████████████████████████████████████████████████████| 6580/6580 [00:00<00:00, 2388241.63it/s]
+计算第7类文章的IDF: 100%|████████████████████████████████████████████████████████████████████████████████| 4663/4663 [00:00<00:00, 2554936.58it/s]
+计算第8类文章的IDF: 100%|████████████████████████████████████████████████████████████████████████████████| 4756/4756 [00:00<00:00, 2512040.02it/s]
+计算第9类文章的IDF: 100%|████████████████████████████████████████████████████████████████████████████████| 6485/6485 [00:00<00:00, 2389323.74it/s]
+计算每类的词总数: 100%|█████████████████████████████████████████████████████████████████████████████████| 23729/23729 [00:00<00:00, 385148.62it/s]
+计算TF中: 100%|█████████████████████████████████████████████████████████████████████████████████████████| 23729/23729 [00:00<00:00, 252906.73it/s]
+储存TF-IDF中: 100%|█████████████████████████████████████████████████████████████████████████████████████| 23729/23729 [00:00<00:00, 217310.87it/s]
+计算每个词的信息熵: 100%|████████████████████████████████████████████████████████████████████████████████| 23729/23729 [00:00<00:00, 89120.96it/s]
+储存score向量矩阵: 100%|████████████████████████████████████████████████████████████████████████████████| 23729/23729 [00:00<00:00, 138359.81it/s]
+遍历resources/exp1_data/my_train_data.txt,数据转成词袋(0,1)向量: 100%|██████████████████████████████████████| 4000/4000 [00:01<00:00, 2698.68it/s]
+遍历resources/exp1_data/my_verification_data.txt,数据转成词袋(0,1)向量: 100%|███████████████████████████████| 4000/4000 [00:01<00:00, 2767.66it/s]
+使用训练集训练SVM模型中...
+使用模型对测试集进行预测...
+模型的准确度: 0.90525
+.s
+----------------------------------------------------------------------
+Ran 6 tests in 450.427s
+
+OK (skipped=3)
+```
+单单的词袋模型就有90%以上的正确率
+
+## 特征向量优化
+词汇表：$V = {w_1, w_2, \ldots, w_M} \text{(训练集中的词汇)}$
+词袋向量矩阵：$D_{N*M} \text{, 大小为 } N_{训练or测试} \times M$。
+词频矩阵：$A_{M*10} ,\text{ 大小为 } M \times 10$
+熵矩阵： $H_{M*1},\text{ 大小为 } M \times 1$
+满足公式:
+$$H_{ij} = -\sum_{j=1}^{10} p(A_{ij}) \cdot \log_2(p(A_{ij}))$$
+而我将$D_{N*M}/H_{M*1}^T$作为SVM的特征向量矩阵
+
+**返回的特征矩阵代码如下:**
+
+```python
+def train_txt_to_support_vector_machine_sample(path):
+    data = readPreprocessing(path)
+    json_objects = data.strip().split('\n')
+    labels = np.zeros((1, len(json_objects)))
+    words_zero_dict = get_words_zero_dict()
+    entropy = get_entropy_inBow()
+    words = []
+    for i, json_str in enumerate(tqdm(json_objects, total=len(json_objects), desc=f'遍历{path},数据转成词袋(0,1)向量')):
+        word = words_zero_dict.copy()
+        data = json.loads(json_str)
+        label = data["label"]
+        raw_text = data["raw"]
+        labels[0][i] = label
+        punctuation_to_split = r'[| -,&!".:?();\n$\'#\*-+]+(?!\s)|\s+'
+        target_words = split_text(raw_text, punctuation_to_split)
+        for target_word in target_words:
+            if target_word in word:
+                word[target_word] += 1
+        words.append(word)
+    return np.array([list(word.values()) for word in words])/entropy, labels
+
+```
+
+**运行结果:**
+
+```bash
+tangjianfeng@tangjianfengdeMacBook-Air project_1 % python -u "/Volumes/TJF_YINGPAN/ai_project/project_1/src/python/__test__.py"
+
+Error deleting file: [Errno 2] No such file or directory: 'out/results.txt'
+Error deleting file: [Errno 2] No such file or directory: 'b.txt'
+文件 'BoW.db' 删除成功
+.s所有所需的包都已安装并可用。
+.s/Volumes/TJF_YINGPAN/ai_project/project_1/src/python/cloud/duringbug/preprocessing/read.py:48: DeprecationWarning: Sampling from a set deprecated
+since Python 3.9 and will be removed in a subsequent version.
+  random_numbers = set(random.sample(all_numbers, app_config.TRAIN_NUM))
+训练集4000条与测试集4000条划分成功
+遍历my_train_txt中: 100%|████████████████████████████████████████████████████████████████████████████████████| 4000/4000 [00:23<00:00, 167.15it/s]
+计算第0类文章的IDF: 100%|████████████████████████████████████████████████████████████████████████████████| 6389/6389 [00:00<00:00, 2429942.71it/s]
+计算第1类文章的IDF: 100%|████████████████████████████████████████████████████████████████████████████████| 4881/4881 [00:00<00:00, 2482706.50it/s]
+计算第2类文章的IDF: 100%|████████████████████████████████████████████████████████████████████████████████| 5081/5081 [00:00<00:00, 2377427.33it/s]
+计算第3类文章的IDF: 100%|████████████████████████████████████████████████████████████████████████████████| 4296/4296 [00:00<00:00, 2435292.60it/s]
+计算第4类文章的IDF: 100%|████████████████████████████████████████████████████████████████████████████████| 4448/4448 [00:00<00:00, 2425411.36it/s]
+计算第5类文章的IDF: 100%|████████████████████████████████████████████████████████████████████████████████| 5385/5385 [00:00<00:00, 2497658.64it/s]
+计算第6类文章的IDF: 100%|████████████████████████████████████████████████████████████████████████████████| 6484/6484 [00:00<00:00, 2473026.02it/s]
+计算第7类文章的IDF: 100%|████████████████████████████████████████████████████████████████████████████████| 4724/4724 [00:00<00:00, 2548082.83it/s]
+计算第8类文章的IDF: 100%|████████████████████████████████████████████████████████████████████████████████| 4559/4559 [00:00<00:00, 2495345.42it/s]
+计算第9类文章的IDF: 100%|████████████████████████████████████████████████████████████████████████████████| 6463/6463 [00:00<00:00, 2415808.46it/s]
+计算每类的词总数: 100%|█████████████████████████████████████████████████████████████████████████████████| 23361/23361 [00:00<00:00, 379501.59it/s]
+计算TF中: 100%|█████████████████████████████████████████████████████████████████████████████████████████| 23361/23361 [00:00<00:00, 251675.05it/s]
+储存TF-IDF中: 100%|█████████████████████████████████████████████████████████████████████████████████████| 23361/23361 [00:00<00:00, 218899.99it/s]
+计算每个词的信息熵: 100%|████████████████████████████████████████████████████████████████████████████████| 23361/23361 [00:00<00:00, 90262.03it/s]
+储存score向量矩阵: 100%|████████████████████████████████████████████████████████████████████████████████| 23361/23361 [00:00<00:00, 138817.97it/s]
+遍历resources/exp1_data/my_train_data.txt,数据转成词袋(0,1)向量: 100%|██████████████████████████████████████| 4000/4000 [00:01<00:00, 2638.18it/s]
+遍历resources/exp1_data/my_verification_data.txt,数据转成词袋(0,1)向量: 100%|███████████████████████████████| 4000/4000 [00:01<00:00, 2711.88it/s]
+使用训练集训练SVM模型中...
+使用模型对测试集进行预测...
+模型的准确度: 0.936
+.s
+----------------------------------------------------------------------
+Ran 6 tests in 395.552s
+
+OK (skipped=3)
+```
+**发现能增长3个百分点，该特征向量集合具有较好的区分性**
+
+### 发现:
+- 1. 逻辑回归和SVM我发现有相同的地方，都最小化损失，不同的是逻辑回归用算出来的最后得分分类，而SVM划分了超平面而不是逻辑回归中求得分最值实现
+- 2. 逻辑回归对高维数据不好处理，而SVM对高维数据准确性更高

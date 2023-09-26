@@ -3,7 +3,7 @@ Description:
 Author: 唐健峰
 Date: 2023-09-14 10:35:44
 LastEditors: ${author}
-LastEditTime: 2023-09-18 17:21:15
+LastEditTime: 2023-09-26 20:18:38
 '''
 import numpy as np
 from tqdm import tqdm
@@ -238,3 +238,15 @@ def score_init():
 
     conn.commit()  # 提交更改
     conn.close()  # 关闭数据库连接
+
+
+def get_entropy_inBow():
+    conn = sqlite3.connect('BoW.db')
+    cursor = conn.cursor()
+    cursor.execute('SELECT * FROM entropy')
+    result = cursor.fetchall()
+    entropy = np.array([item[1] for item in result])
+    conn.commit()  # 提交更改
+    conn.close()  # 关闭数据库连接
+
+    return entropy

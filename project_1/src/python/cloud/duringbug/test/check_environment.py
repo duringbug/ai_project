@@ -3,12 +3,14 @@ Description:
 Author: 唐健峰
 Date: 2023-09-16 20:22:06
 LastEditors: ${author}
-LastEditTime: 2023-09-18 19:03:13
+LastEditTime: 2023-09-26 18:47:50
 '''
 
 
 def test_import():
     try:
+        from sklearn.metrics import accuracy_score
+        from sklearn.svm import SVC
         import unittest
         import numpy
         from tqdm import tqdm

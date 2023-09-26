@@ -3,7 +3,7 @@ Description:
 Author: 唐健峰
 Date: 2023-09-14 10:36:58
 LastEditors: ${author}
-LastEditTime: 2023-09-18 17:23:32
+LastEditTime: 2023-09-26 14:50:04
 '''
 
 import sqlite3
@@ -23,3 +23,15 @@ def get_sorce_dict():
         score_data[word] = scores_list
 
     return score_data
+
+
+def get_words_zero_dict():
+    conn = sqlite3.connect('BoW.db')
+    cursor = conn.cursor()
+    cursor.execute('SELECT * FROM words')
+    results = cursor.fetchall()
+    conn.close()  # 关闭数据库连接
+    words = {}
+    for row in results:
+        words[row[0]] = 0
+    return words
