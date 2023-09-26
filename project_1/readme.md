@@ -3,7 +3,7 @@
  * @Author: 唐健峰
  * @Date: 2023-09-14 15:21:44
  * @LastEditors: ${author}
- * @LastEditTime: 2023-09-26 21:38:45
+ * @LastEditTime: 2023-09-26 21:41:14
 -->
 # 逻辑回归
 
@@ -406,10 +406,10 @@ OK (skipped=3)
 单单的词袋模型就有90%以上的正确率
 
 ## 特征向量优化
-词汇表: $V = {w_1, w_2, \ldots, w_M} \text{(训练集中的词汇)}$ <br/>
-词袋向量矩阵: $D_{N*M} \text{, 大小为 } N_{训练or测试} \times M$ <br/>
-词频矩阵: $A_{M*10} ,\text{ 大小为 } M \times 10$ <br/>
-熵矩阵: $H_{M*1},\text{ 大小为 } M \times 1$ <br/>
+词汇表: $$V = {w_1, w_2, \ldots, w_M} \text{(训练集中的词汇)}$$ 
+词袋向量矩阵: $$D_{N*M} \text{, 大小为 } N_{训练or测试} \times M$$
+词频矩阵: $$A_{M*10} ,\text{ 大小为 } M \times 10$$
+熵矩阵: $$H_{M*1},\text{ 大小为 } M \times 1$$
 满足公式:
 $$H_{ij} = -\sum_{j=1}^{10} p(A_{ij}) \cdot \log_2(p(A_{ij}))$$
 而我将$D_{N*M}/H_{M*1}^T$作为SVM的特征向量矩阵
