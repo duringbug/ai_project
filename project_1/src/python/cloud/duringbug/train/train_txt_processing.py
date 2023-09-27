@@ -3,7 +3,7 @@ Description:
 Author: 唐健峰
 Date: 2023-09-15 18:20:07
 LastEditors: ${author}
-LastEditTime: 2023-09-21 12:50:47
+LastEditTime: 2023-09-27 09:02:25
 '''
 import sqlite3
 import json
@@ -79,7 +79,7 @@ def train_txt_to_matrix():
 
     b = np.zeros((all_num, 10))
 
-    for i, json_str in enumerate(tqdm(json_objects, total=all_num, desc="遍历test_my_train_txt中")):
+    for i, json_str in enumerate(tqdm(json_objects, total=all_num, desc="计算偏置向量b中")):
 
         data = json.loads(json_str)
         label = data["label"]

@@ -46,4 +46,4 @@ def trans_test_txt_to_support_vector_machine_sample(path):
                 if target_word in word:
                     word[target_word] += 1
             words.append(word)
-    return np.array([list(word.values()) for word in words])
+    return np.array([list(word.values()) for word in words])/entropy
