@@ -3,7 +3,7 @@ Description:
 Author: 唐健峰
 Date: 2023-09-26 14:09:17
 LastEditors: ${author}
-LastEditTime: 2023-09-27 08:53:33
+LastEditTime: 2023-09-28 10:02:02
 '''
 from cloud.duringbug.dao.data import *
 from cloud.duringbug.preprocessing.index import *
@@ -21,7 +21,6 @@ def before_support_vector_machine():
     dbinit()
     tf_idf_Bow()
     entropy_BoW()
-    score_init()
 
 
 def support_vector_machine():

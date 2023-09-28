@@ -3,14 +3,20 @@ Description:
 Author: 唐健峰
 Date: 2023-09-18 11:13:32
 LastEditors: ${author}
-LastEditTime: 2023-09-26 13:47:27
+LastEditTime: 2023-09-28 14:25:32
 '''
 
 from cloud.duringbug.dao.data import *
 from cloud.duringbug.preprocessing.index import *
 from cloud.duringbug.preprocessing.read import train_file_divide
 from cloud.duringbug.train.decision_tree_train import processing_json_txt
-from cloud.duringbug.train.train_txt_processing import getX, getW
+from cloud.duringbug.train.train_txt_processing import getX, getW, getL
+
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.preprocessing import StandardScaler
+from sklearn.model_selection import GridSearchCV
+from sklearn.pipeline import Pipeline
+from sklearn.metrics import accuracy_score
 
 import os
 import numpy as np
@@ -24,6 +30,50 @@ def before_decision_tree_to_results_txt():
     entropy_BoW()
     score_init()
     test_train()
+
+
+def before_decision_tree_to_results_txt_through_sklearn():
+    train_file_divide()
+    dbinit()
+    tf_idf_Bow()
+    entropy_BoW()
+    score_init()
+
+
+def decision_tree_to_results_txt_through_sklearn():
+    W = getW()
+    with open('resources/exp1_data/my_test.txt', 'r') as file:
+        X = getX(file)
+    with open('resources/exp1_data/my_test.txt', 'r') as file:
+        L = getL(file)
+    R = np.dot(X, W)/L
+    param_grid = {
+        'criterion': ['gini', 'entropy'],
+        'max_depth': [None, 10, 20],
+        'min_samples_split': [2, 5, 10],
+        'min_samples_leaf': [1, 2, 4],
+        'max_features': [None, 'sqrt', 'log2'],
+        'random_state': [42]
+    }
+    # 获取训练数据和标签
+    # labels(1*4000), result[i]是type*words*score的三维组
+    labels, sample, average, result = processing_json_txt(
+        "resources/exp1_data/my_train_data.txt", step=5)  # 10分类问题
+    labels_verification, sample_verification, average_verification, result_verification = processing_json_txt(
+        "resources/exp1_data/my_verification_data.txt", step=5)  # 10分类问题
+    # 创建决策树分类器s
+
+    clf = GridSearchCV(DecisionTreeClassifier(), param_grid, cv=5)
+    clf.fit(sample, labels)
+    predictions = clf.predict(sample_verification)
+    # 比较预测结果与验证标签
+    accuracy = accuracy_score(labels_verification, predictions)
+    print("Accuracy:", accuracy)
+    predictions_R = clf.predict(R)
+    with open('out/results.txt', 'w') as file:
+        file.write("id, pred\n")
+        for row_index, label in enumerate(predictions_R):
+            file.write("{} {}\n".format(row_index, label))
 
 
 def decision_tree_to_results_txt():

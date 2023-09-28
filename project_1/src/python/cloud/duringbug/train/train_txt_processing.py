@@ -3,7 +3,7 @@ Description:
 Author: 唐健峰
 Date: 2023-09-15 18:20:07
 LastEditors: ${author}
-LastEditTime: 2023-09-27 09:02:25
+LastEditTime: 2023-09-28 14:22:40
 '''
 import sqlite3
 import json
@@ -345,6 +345,24 @@ def getW():
     score_matrix = np.array(score_matrix)
     # N*10
     return score_matrix
+
+
+def getL(texts):
+    text_dict = {}
+    for line in texts:
+        parts = line.strip().split(', ', 1)
+        if len(parts) == 2:
+            index, text = parts
+            # 将索引转换为整数
+            index = int(index)
+            # 存储到字典中
+            text_dict[index] = text
+    L = np.zeros((len(text_dict), 1))
+    for i, text in enumerate(tqdm(text_dict, total=len(text_dict), desc="遍历my_test_txt中")):
+        punctuation_to_split = r'[| -,&!".:?();\n$\'#\*-+]+(?!\s)|\s+'
+        target_words = split_text(text_dict[i], punctuation_to_split)
+        L[i][0] = len(target_words)
+    return L
 
 
 def getX(texts):
